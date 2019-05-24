@@ -1,36 +1,108 @@
 from GraphObj import GraphObj
 from time import time
+from copy import deepcopy
+import consts
 
-def solve_backtrack(gObj, print):
+
+def solve_FC(gObj, print):
     K = 0
+
+    return [K, total]
+
+
+def Backtrack(file_name, print_val):
+    graphObj = GraphObj(filename)
+    graphObj.resetArray()
+    c_color = 0
     start = time()
     for k in range(4, 100):
-        gObj.resetArray()
-        if (gObj.backtrack(k, print)):
-            K = k
+        graphObj.resetArray()
+        if graphObj.backtrack(k, print_val):
+            c_color = k
             break
 
     total = time() - start
-    return [K, total]
 
-def Backtrack(file_name, type=1, print=True):
+    printResults(graphObj, c_color, total)
+
+
+def Forward_checking(filename, print_val=False):
     graphObj = GraphObj(filename)
     graphObj.resetArray()
-    colors = 0
-    time = 0
+    start = time()
+    c_color = 0
 
-    if type == 1:
-        [colors, time] = solve_backtrack(graphObj, print)
+    for k in range(4, 100):
+        graphObj.resetArray()
+        print("-I- Check for ", k, " colors")
+        if graphObj.forwardcheck(k, print_val):
+            c_color = k
+            break
+
+    total = time() - start
+    printResults(graphObj, c_color, total)
 
 
-    elif type == 2:
-        [colors, time] = solve_backtrack_FC(graphObj, print)
+def Feasibility(filename, itr=10, freedom=5, print_val=False):
+    graphObj = GraphObj(filename)
+    minimum = graphObj.V + 1
+    start = time()
+    arr_coloring = []
+    for i in range(0, consts.epochs):
+        graphObj.resetArray()
+        graphObj.feasiblity_LS(itr, freedom, print_val)
+        if graphObj.num_of_colors() < minimum:
+            minimum = graphObj.num_of_colors()
+            arr_coloring = deepcopy(graphObj.colors_array)
 
-    else:
-        print("-E- Only types are 1 or 2")
-        return
+    total = time() - start
+    graphObj.colors_array = deepcopy(arr_coloring)
+    printResults(graphObj, minimum, total)
 
-    printResults(graphObj, colors, time)
+
+def Target(filename):
+    graphObj = GraphObj(filename)
+    graphObj.resetArray()
+    start = time()
+    graphObj.Target_LS()
+    colors_num = graphObj.num_of_colors()
+    total = time() - start
+    printResults(graphObj, colors_num, total)
+
+
+def Hybird(filename, itr=100, print_val=False):
+    graphObj = GraphObj(filename)
+    colors_num = 0
+    start = time()
+
+    for k in range(5, 100):
+        graphObj.resetArray()
+        if graphObj.hybrid(k, itr, print_val):
+            colors_num = graphObj.num_of_colors()
+            break
+
+    total = time() - start
+    printResults(graphObj, colors_num, total)
+
+
+def solve_max_Ci(filename, freedom=5, print_val=False):
+    graphObj = GraphObj(filename)
+    colors_num = graphObj.V
+    arr_coloring = deepcopy(graphObj.colors_array)
+    start = time()
+
+    for i in range(0, consts.epochs):
+        graphObj.goal_target_Max_Ci(freedom, print_val)
+        k = graphObj.num_of_colors()
+        if k < colors_num:
+            colors_num = k
+            arr_coloring = deepcopy(graphObj.colors_array)
+
+    t = time() - start
+    graphObj.colors_array = deepcopy(arr_coloring)
+    del arr_coloring
+    printResults(graphObj, colors_num, t)
+
 
 def printResults(graphObj, colors, time):
     print("\nGraph statistics: ")
@@ -41,22 +113,23 @@ def printResults(graphObj, colors, time):
 
 filename = "DSJC125.1.col"
 
-# backtrack search
-print("attempting backtrack with backjumping search...")
-Backtrack(filename, 1, False)
+# backtrack search vs forward checking
+# print("attempting backtrack with backjumping search...")
+# Backtrack(filename, False)
 
-# print("attempting backtrack with arc consistency search...")
-# Backtrack(filename, type=2, print_status=False)
+# print("attempting forward checking with arc consistency search...")
+# Forward_checking(filename, False)
 #
 # # local search
 # print("attempting feasibility approach local search...")
-# local_search(filename, type=1, print_status=False, itr=100, visits=10, freedom=5)
-#
-# print("attempting goal target approach local search...")
-# local_search(filename, type=2, print_status=False, itr=100, visits=10, freedom=5)
+# Feasibility(filename, 10, 5, False)
 #
 # print("attempting goal target (max independent set) approach local search...")
-# local_search(filename, type=3, print_status=False, itr=100, visits=10, freedom=5)
+# Target(filename)
 #
 # print("attempting hybrid approach (bad edges fitness) local search...")
-# local_search(filename, type=4, print_status=False, itr=100, visits=10, freedom=5)
+# Hybird(filename, 100, False)
+#
+# print("attempting goal target approach local search...")
+# solve_max_Ci(filename, 5, False)
+#
