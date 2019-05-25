@@ -110,8 +110,8 @@ filename = "DSJC125.1.col"
 # print("-I- Start backtracking with backjumping")
 # Backtrack(filename, False)
 
-print("-I- Start forward checking with arc consistency")
-Forward_checking(filename, False)
+# print("-I- Start forward checking with arc consistency")
+# Forward_checking(filename, False)
 
 # # local search
 # print("-I- Local search part")
@@ -122,8 +122,8 @@ Forward_checking(filename, False)
 # print("-I- Target function")
 # Target(filename)
 #
-# print("-I- Hybrid")
-# Hybrid(filename, 100, False)
+print("-I- Hybrid")
+Hybrid(filename, 100, False)
 #
 # # goal target (max Ci^2)
 # print("attempting goal target approach local search...")

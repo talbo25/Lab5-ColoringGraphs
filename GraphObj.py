@@ -393,8 +393,8 @@ class GraphObj:
 
         # finish
         print("-I- Summary:")
-        print("\nTime: ", time() - start)
-        print("\nStates: ", states)
+        print("Time: ", time() - start)
+        print("States: ", states)
         return True
 
     def getColorsNumber(self):
@@ -513,8 +513,8 @@ class GraphObj:
                 self.initHeap(heap, color_count)
 
         print("-I- Summary:")
-        print("\nTime: ", time() - start)
-        print("\nStates: ", states)
+        print("Time: ", time() - start)
+        print("States: ", states)
 
         return True
 
@@ -613,8 +613,8 @@ class GraphObj:
 
         # finish
         print("-I- Summary:")
-        print("\nTime: ", time() - start)
-        print("\nStates: ", states)
+        print("Time: ", time() - start)
+        print("States: ", states)
         return True
 
     def uncolored(self, i):
@@ -695,7 +695,7 @@ class GraphObj:
             if print_status and attempts_counter % 20 == 0:
                 print("-I- Number of bad vertices: ", len(bad_vertices))
                 print("-I- K value is ", len(set(self.colors_array)))
-                attempts_counter += 1
+            attempts_counter += 1
             v = choice(bad_vertices)
 
             # choose new color for v
@@ -705,8 +705,8 @@ class GraphObj:
             bad_vertices = self.getConflictedVertices()
 
         print("-I- Summary:")
-        print("\nTime: ", time() - start)
-        print("\nStates: ", attempts_counter)
+        print("Time: ", time() - start)
+        print("States: ", attempts_counter)
 
         if attempts_counter < itr:
             return True
@@ -741,7 +741,7 @@ class GraphObj:
             if fitness < minimum:
                 minimum = fitness
                 minimum_color = i
-                num_colors[i] -= 1
+            num_colors[i] -= 1
 
         return minimum_color
 
