@@ -207,7 +207,7 @@ class GraphObj:
             if i < n - 1:
                 x = self.getArcConsistency(domain_buffer, i)
             else:
-                x = self.getArcConsistency(domain_buffer[i], i)
+                x = self.selectLastValue(domain_buffer[i], i)
 
             if x is None:
                 i = i - 1
@@ -226,6 +226,20 @@ class GraphObj:
             print("total time: ", time() - start)
             print("states: ", states)
             return True
+
+    def selectLastValue(self, _domain, i):
+        if self.isEmpty(_domain):
+            # no available color for last vertex
+            return None
+        else:
+            for c in range(0, len(_domain)):
+                # color c is not in Domain of i
+                if _domain[c] == 0:
+                    continue
+                # color c is consistent with last vertex; return it
+                elif self.checkConsistent(i, c):
+                    return c
+            return None
 
     def multiple(self, colors, vertices):
         if len(vertices) != len(colors):

@@ -3,13 +3,6 @@ from time import time
 from copy import deepcopy
 import consts
 
-
-def solve_FC(gObj, print):
-    K = 0
-
-    return [K, total]
-
-
 def Backtrack(file_name, print_val):
     graphObj = GraphObj(filename)
     graphObj.resetArray()
@@ -70,7 +63,7 @@ def Target(filename):
     printResults(graphObj, colors_num, total)
 
 
-def Hybird(filename, itr=100, print_val=False):
+def Hybrid(filename, itr=100, print_val=False):
     graphObj = GraphObj(filename)
     colors_num = 0
     start = time()
@@ -113,25 +106,25 @@ def printResults(graphObj, colors, time):
 
 filename = "DSJC125.1.col"
 
-# backtrack search vs forward checking
-# print("attempting backtrack with backjumping search...")
+# # backtrack search vs forward checking
+# print("-I- Start backtracking with backjumping")
 # Backtrack(filename, False)
 
-# print("attempting forward checking with arc consistency search...")
-# Forward_checking(filename, False)
-#
+print("-I- Start forward checking with arc consistency")
+Forward_checking(filename, False)
+
 # # local search
-# print("attempting feasibility approach local search...")
+# print("-I- Local search part")
+# print("-I- Feasibility")
 # Feasibility(filename, 10, 5, False)
 #
 # # goal target (max independent set)
-# print("attempting goal target (max independent set) approach local search...")
+# print("-I- Target function")
 # Target(filename)
 #
-# print("attempting hybrid approach (bad edges fitness) local search...")
-# Hybird(filename, 100, False)
+# print("-I- Hybrid")
+# Hybrid(filename, 100, False)
 #
 # # goal target (max Ci^2)
 # print("attempting goal target approach local search...")
 # solve_max_Ci(filename, 5, False)
-#
