@@ -316,7 +316,7 @@ class GraphObj:
     def push(self, heap, key, value):
         heappush(heap, (key, value))
 
-    def feasiblity_LS(self, itr=10, freedom=5, print_status=False):
+    def feasiblity_LS(self, itr=10, freedom=5, print_val=False):
 
         # apply greedy coloring method
         self.greedy_color(freedom)
@@ -330,15 +330,15 @@ class GraphObj:
             return 0
 
         states = 0
-        start = time()
         consistent = True
         backup_array = deepcopy(self.colors_array)
+        start = time()
 
         while consistent:
-            if print_status:
-                print("Attempting to reduce colors to ", len(colors), "...", end="")
+            if print_val:
+                print("-I- Reduce colors to ", len(colors))
             # count visitations in every v
-            visits = np.zeros(shape=self.V).astype(int)
+            visits_arr = np.zeros(shape=self.V).astype(int)
 
             # reduce number of colors by 1
             removed_color = choice(colors)
@@ -352,34 +352,35 @@ class GraphObj:
 
             while True:
                 # let v_i be a randomly selected conflicted vertex
-                v_i = self.random_conflicted_vertex()
+                rand_vertex = self.random_conflicted_vertex()
                 states += 1
 
                 # if there are no conflicts, continue
-                if v_i == None:
-                    if print_status:
-                        print("Success")
+                if not rand_vertex:
+                    if print_val:
+                        print("-I- Success")
                     backup_array = deepcopy(self.colors_array)
                     break
 
-                # if v_i has been causing conlcits more than itr, we stop
-                elif visits[v_i] > itr:
-                    if print_status:
-                        print("Failed")
+                # if v_i has been causing conflicts more than itr, we stop
+                elif visits_arr[rand_vertex] > itr:
+                    if print_val:
+                        print("-I- Failed")
                     consistent = False
                     break
 
                 # update visits(Vi)
                 # C(Vi) <- k s.t Vi has minimum conflicts with its neighbours
-                visits[v_i] += 1
-                self.colors_array[v_i] = self.min_conflicts(colors, v_i)
+                visits_arr[rand_vertex] += 1
+                self.colors_array[rand_vertex] = self.min_conflicts(colors, rand_vertex)
 
         # restore coloring to last feasible solution
         self.colors_array = deepcopy(backup_array)
 
         # finish
-        print("Total time: ", time() - start)
-        print("Total states: ", states)
+        print("-I- Summary:")
+        print("\nTime: ", time() - start)
+        print("\nStates: ", states)
         return True
 
     def num_of_colors(self):
@@ -399,7 +400,7 @@ class GraphObj:
                     break
 
         # change each color according to freedom
-        if (freedom == 1):
+        if freedom == 1:
             return
 
         for i in range(0, n):
@@ -408,45 +409,45 @@ class GraphObj:
             self.colors_array[i] = randint(color * freedom, next_color * freedom - 1)
 
     # Returns the color that minimizes conflicts for vertex i
-    def min_conflicts(self, colors, i):
+    def min_conflicts(self, _colors, i):
 
         # there are |V| vertices, so the max number of conflicts is |V|, therefore |V|+1 is greater than any number of possible conflicts
-        min = self.V + 1
+        minimum_value = self.V + 1
         best_color = -1
 
         # eval conflicts for Vi for each color, and return the color with the least conflicts
-        for c in colors:
-            conflicts = self.num_of_conflicts(i, c)
-            if (conflicts < min):
-                min = conflicts
+        for c in _colors:
+            num_conflicts = self.num_of_conflicts(i, c)
+            if num_conflicts < minimum_value:
+                minimum_value = num_conflicts
                 best_color = c
 
         return best_color
 
     def random_conflicted_vertex(self):
-        conflicted_vertices = []
+        arr_conflicted_vertices = []
 
         # append all conflicted v to array
         for i in range(0, self.V):
-            if (not self.checkConsistent(i)):
-                conflicted_vertices.append(i)
+            if not self.checkConsistent(i):
+                arr_conflicted_vertices.append(i)
 
-        # if no conflictes, return -1
-        if (len(conflicted_vertices) == 0):
+        # if no conflicts, return -1
+        if len(arr_conflicted_vertices) == 0:
             return None
 
         # output a random element from list of conflicted vertices
-        return choice(conflicted_vertices)
+        return choice(arr_conflicted_vertices)
 
     def num_of_conflicts(self, v, c):
-        conflicts = 0
+        conflicts_counter = 0
         for i in range(0, self.V):
-            if (i == v):
+            if i == v:
                 continue
             if self.checkEdge(v, i) and self.colors_array[i] == c:
-                conflicts = conflicts + 1
+                conflicts_counter = conflicts_counter + 1
 
-        return conflicts
+        return conflicts_counter
 
     def goal_target_Max_Ci(self, freedom_mod=5, print_progress=True):
 
@@ -459,47 +460,47 @@ class GraphObj:
         # backup_array = deepcopy(self.colors_array)
 
         # let C be a bucket list of all colors over V
-        C = self.count_colors()
-        if C is None:
-            print("goal_target_Max_Ci exiting")
+        color_count = self.count_colors()
+        if color_count is None:
             return False
 
         # Init heap
-        Heap = []
-        self.queue_colors(Heap, C)
+        heap = []
+        self.queue_colors(heap, color_count)
 
         # reduce colors by increasing sigma (Ci^2) for i=1..n
-        while (Heap):
+        while heap:
 
-            if (print_progress):
-                print("Attempting to decrease K to ", len(set(self.colors_array)) - 1, "...")
+            if print_progress:
+                print("-I- Decrease K to ", len(set(self.colors_array)) - 1)
 
             # let c_min be the color we wish to remove
-            c_min = self.pop(Heap)
+            c_min = self.pop(heap)
 
             # for each vertex with color = c_min, change it
             color_changed = False
             for i in range(0, self.V):
                 if self.colors_array[i] == c_min:
                     states += 1
-                    x = self.select_value_goalTarget(i, C)
+                    x = self.select_value_goalTarget(i, color_count)
                     # if no such coloring exists, finish
-                    if (x != None):
+                    if x:
                         color_changed = True
                         self.colors_array[i] = x
-                        if (not self.consisntent_graph()):
+                        if not self.consisntent_graph():
                             print("GRAPH NOT CONSISTENT")
                             return False
-                        C[x] += 1
-                        C[c_min] -= 1
+                        color_count[x] += 1
+                        color_count[c_min] -= 1
 
             # if we successfully changed the graph, update the heap
-            if (color_changed):
-                Heap = []
-                self.queue_colors(Heap, C)
+            if color_changed:
+                heap = []
+                self.queue_colors(heap, color_count)
 
-        print("Total time: ", time() - start)
-        print("Total states: ", states)
+        print("-I- Summary:")
+        print("\nTime: ", time() - start)
+        print("\nStates: ", states)
 
         return True
 
@@ -509,68 +510,68 @@ class GraphObj:
         C = np.zeros(shape=(n + 1)).astype(int)
         for color in self.colors_array:
             if (color > n):
-                print("count_colors error: color is greater than max range ", n)
+                print("-E- Color is greater than max range ", n)
                 return None
             C[color] += 1
         return C
 
     # function initiate all colors (min first) into min heap H, beside the most frequent color
-    def queue_colors(self, Heap, Colors):
-        C_copy = deepcopy(Colors)
-        c_max = np.argmax(C_copy).astype(int)
-        for i in range(0, len(C_copy)):
-            c_min = self.least_frequent_color(C_copy)
+    def queue_colors(self, _heap, _colors):
+        array_backup = deepcopy(_colors)
+        max_color = np.argmax(array_backup).astype(int)
+        for i in range(0, len(array_backup)):
+            min_color = self.least_frequent_color(array_backup)
             # no more elements beside max (min=max)
-            if (c_min == c_max):
+            if min_color == max_color:
                 break
 
-            elif (c_min == -1):
-                print("queue colors: c_min not initiated")
+            elif min_color == -1:
+                print("-W- Variable \"min_color\" is not initiated")
                 return
 
             # remove entry from C, and save it on H
-            key = C_copy[c_min]
-            C_copy[c_min] = 0
-            self.push(Heap, key, c_min)
+            key = array_backup[min_color]
+            array_backup[min_color] = 0
+            self.push(_heap, key, min_color)
 
-        del C_copy
+        del array_backup
 
     # given vertex i and a count of each color class, attempts to find a more frequent color for vertex i
     def select_value_goalTarget(self, i, colors_count):
-        C = deepcopy(colors_count)
+        backup = deepcopy(colors_count)
         this_color = self.colors_array[i]
 
-        for j in range(0, len(C)):
+        for j in range(0, len(backup)):
             # get most frequenst color
-            c_max = np.argmax(C).astype(int)
-            c_max = int(c_max)
+            max_color = np.argmax(backup).astype(int)
+            max_color = int(max_color)
 
             # no more available colors
-            if (c_max == this_color or c_max <= 0):
+            if max_color == this_color or max_color <= 0:
                 return None
 
             # found consistent color
-            if (self.checkConsistent(i, c_max)):
-                return c_max
+            if self.checkConsistent(i, max_color):
+                return max_color
 
             # most frequent color inconsistent, remove it from temp list
             else:
-                C[c_max] = 0
+                backup[max_color] = 0
 
         # if all other colors are inconsistent, return None
         return None
 
-    def least_frequent_color(self, C):
-        min = self.V + 1
-        min_color = -1
-        for i in range(0, len(C)):
-            if (C[i] < min and C[i] > 0):
-                min = C[i]
-                min_color = i
+    def least_frequent_color(self, _colors_arr):
+        minimum_value = self.V + 1
+        minimum_color = -1
+        for i in range(0, len(_colors_arr)):
+            if (_colors_arr[i] < minimum_value) and (_colors_arr[i] > 0):
+                minimum_value = _colors_arr[i]
+                minimum_color = i
 
-        return min_color
+        return minimum_color
 
-    def Target_LS(self, print_status=True):
+    def Target_LS(self, print_val=True):
 
         heap = []
         K = 0
@@ -578,11 +579,11 @@ class GraphObj:
         states = 0
         while (not self.fully_coloured()):
             states += 1
-            if (print_status):
-                print("Searching for ", K, "-th set")
+            if print_val:
+                print("-I- Check for the ", K, "# set")
             # insert all uncolored vertices to heap
             for i in range(0, self.V):
-                if (self.uncolored(i)):
+                if self.uncolored(i):
                     degree_i = self.neighbour_count(i)
                     self.push(heap, degree_i, i)
 
@@ -597,63 +598,63 @@ class GraphObj:
             K = K + 1
 
         # finish
-        print("Total time: ", time() - start)
-        print("Total states: ", states)
+        print("-I- Summary:")
+        print("\nTime: ", time() - start)
+        print("\nStates: ", states)
         return True
 
     def uncolored(self, i):
-        if (self.colors_array[i] == -1):
+        if self.colors_array[i] == -1:
             return True
         return False
 
     # returns true when every vertex has a color
     def fully_coloured(self):
         for i in range(0, self.V):
-            if (self.colors_array[i] == -1):
+            if self.colors_array[i] == -1:
                 return False
         return True
 
     def neighbour_count(self, i):
         res = 0
         for j in range(0, self.V):
-            if (j == i):
+            if j == i:
                 continue
-            if (self.checkEdge(i, j)):
+            if self.checkEdge(i, j):
                 res = res + 1
 
         return res
 
     def max_independent_set(self, heap):
 
-        if (not heap):
-            print("max set cover: heap emtpy")
+        if not heap:
+            print("-E- Heap is emtpy")
             return None
 
         set = []
-        set_neighbours = []
 
         # insert first vertex into set
-        X_i = self.pop(heap)
-        set.append(X_i)
+        top_element = self.pop(heap)
+        set.append(top_element)
 
-        # insert all neighbours of X_1 to neighbourhood
-        N = self.get_neighbours(X_i)
-        set_neighbours = set + N
+        # insert all neighbours of top_element to neighbourhood
+        element_neighbours = self.get_neighbours(top_element)
+        set_neighbours = set + element_neighbours
 
         # as long as heap is not empty, add independent vertices with lowest degree
-        while (heap):
+        while heap:
             # get next vertex with lowest degree
-            X_i = self.pop(heap)
+            top_element = self.pop(heap)
 
-            # if X_i is indepent to current set, add X_i to set
-            if (X_i not in set_neighbours):
-                set.append(X_i)
-                N = self.get_neighbours(X_i)
+            # if top_element is indepent to current set, add top_element to set
+            if top_element not in set_neighbours:
+                set.append(top_element)
+                element_neighbours = self.get_neighbours(top_element)
 
                 # Add new neighbours to neighbourhood
-                for i in range(0, N.__len__()):
-                    if (N[i] not in set_neighbours):
-                        set_neighbours.append(N[i])
+                for i in range(0, element_neighbours.__len__()):
+                    if element_neighbours[i] not in set_neighbours:
+                        set_neighbours.append(element_neighbours[i])
 
         return set
 
@@ -663,9 +664,9 @@ class GraphObj:
 
         # for vertex i, add all neighbours to array
         for j in range(0, self.V):
-            if (i == j):
+            if i == j:
                 continue
-            if (self.checkEdge(i, j)):
+            if self.checkEdge(i, j):
                 neighbours.append(j)
         # return neighbours
         return neighbours
@@ -675,12 +676,12 @@ class GraphObj:
 
         bad_vertices = self.get_conflicted_vertices()
         start = time()
-        tries = 0
-        while len(bad_vertices) > 0 and tries < itr:
-            if (print_status and tries % 20 == 0):
-                print("bad V: ", len(bad_vertices))
-                print("K = ", len(set(self.colors_array)))
-            tries += 1
+        attempts_counter = 0
+        while len(bad_vertices) > 0 and attempts_counter < itr:
+            if print_status and attempts_counter % 20 == 0:
+                print("-I- Number of bad vertices: ", len(bad_vertices))
+                print("-I- K value is ", len(set(self.colors_array)))
+                attempts_counter += 1
             v = choice(bad_vertices)
 
             # choose new color for v
@@ -689,82 +690,83 @@ class GraphObj:
 
             bad_vertices = self.get_conflicted_vertices()
 
-        print("Total time: ", time() - start)
-        print("Total states: ", tries)
+        print("-I- Summary:")
+        print("\nTime: ", time() - start)
+        print("\nStates: ", attempts_counter)
 
-        if (tries < itr):
+        if attempts_counter < itr:
             return True
-        else:
-            return False
+
+        return False
 
     def random_coloring(self, K):
-        for i in range(0,self.V):
-            self.colors_array[i] = randint(0,K-1)
+        for i in range(0, self.V):
+            self.colors_array[i] = randint(0, K - 1)
 
     def get_conflicted_vertices(self):
-        b = []
+        conflicted_array = []
         for e in self.E:
-            if (self.is_badEdge(e[0], e[1])):
-                b.append(e[0])
-                b.append(e[1])
-        return b
+            if self.is_badEdge(e[0], e[1]):
+                conflicted_array.append(e[0])
+                conflicted_array.append(e[1])
+        return conflicted_array
 
     def select_value_hybrid(self, v):
-        min = math.inf
-        min_color = None
-        C = self.count_colors()
-        old_color = self.colors_array[v]
-        C[old_color] -= 1
-        for i in range(0, len(C)):
-            if (C[i] == 0):
+        minimum = math.inf
+        minimum_color = None
+        num_colors = self.count_colors()
+        backup = self.colors_array[v]
+        num_colors[backup] -= 1
+        for i in range(0, len(num_colors)):
+            if num_colors[i] == 0:
                 continue
             self.colors_array[v] = i
-            C[i] += 1
-            B = self.count_bad_edges()
-            fitness = self.calc_fitness(C, B)
-            if fitness < min:
-                min = fitness
-                min_color = i
-            C[i] -= 1
+            num_colors[i] += 1
+            be_number = self.count_bad_edges()
+            fitness = self.calc_fitness(num_colors, be_number)
+            if fitness < minimum:
+                minimum = fitness
+                minimum_color = i
+                num_colors[i] -= 1
 
-        return min_color
+        return minimum_color
 
     def is_badEdge(self, i, j):
-        if (i >= self.V):
-            print("i out of range! ", i)
+        if j >= self.V:
+            print("-E- Index j out of range! ", j)
             return False
-        if (j >= self.V):
-            print("j out of range! ", j)
+        if i >= self.V:
+            print("-E- Index i out of range! ", i)
             return False
 
-        if (self.colors_array[i] == self.colors_array[j]):
+        if self.colors_array[i] == self.colors_array[j]:
             return True
         else:
             return False
 
     # calc fitness according to:
     # SIGMA [2*Bi*Ci - SIGMA [Ci^2] ]
-    def calc_fitness(self, C, B):
+    def calc_fitness(self, _colors, _bad_edges):
         # C: color counts
         # B: bad edges counts
-        if (len(B) != len(C)):
-            print("calc_fitness: B,C size mismatch!")
+        if len(_bad_edges) != len(_colors):
+            print("-W- Color counter and bad edges counter not equal")
             return -1
 
         # calc fitness
         fitness = 0
-        for i in range(0, len(B)):
-            fitness += (2 * B[i] * C[i]) - C[i] ** 2
+        for i in range(0, len(_bad_edges)):
+            fitness += (2 * _bad_edges[i] * _colors[i]) - _colors[i] ** 2
 
         return fitness
 
     def count_bad_edges(self):
-        n = self.max_color()
-        B = np.zeros(shape=(n + 1)).astype(int)
+        max_color = self.max_color()
+        bad_edges_arr = np.zeros(shape=(max_color + 1)).astype(int)
         for e in self.E:
             u = e[1]
             v = e[0]
-            if (self.is_badEdge(u, v)):
+            if self.is_badEdge(u, v):
                 color = self.colors_array[u]
-                B[color] += 1
-        return B
+                bad_edges_arr[color] += 1
+        return bad_edges_arr
