@@ -55,9 +55,27 @@ def Feasibility(filename, itr=10, freedom=5, print_val=False):
     graphObj.colors_array = deepcopy(arr_coloring)
     printResults(graphObj, minimum, total)
 
+# type 2 goal target (max Ci^2)
+def Target(filename, freedom=5, print_val=False):
+    graphObj = GraphObj(filename)
+    colors_num = graphObj.V
+    arr_coloring = deepcopy(graphObj.colors_array)
+    start = time()
+
+    for i in range(0, consts.epochs):
+        graphObj.solveTaretMax(freedom, print_val)
+        k = graphObj.getColorsNumber()
+        if k < colors_num:
+            colors_num = k
+            arr_coloring = deepcopy(graphObj.colors_array)
+
+    t = time() - start
+    graphObj.colors_array = deepcopy(arr_coloring)
+    del arr_coloring
+    printResults(graphObj, colors_num, t)
 
 # type 3 goal target (max independent set)
-def Target(filename):
+def Target2(filename):
     graphObj = GraphObj(filename)
     graphObj.resetArray()
     start = time()
@@ -82,26 +100,6 @@ def Hybrid(filename, itr=100, print_val=False):
     printResults(graphObj, colors_num, total)
 
 
-# type 2 goal target (max Ci^2)
-def solve_max_Ci(filename, freedom=5, print_val=False):
-    graphObj = GraphObj(filename)
-    colors_num = graphObj.V
-    arr_coloring = deepcopy(graphObj.colors_array)
-    start = time()
-
-    for i in range(0, consts.epochs):
-        graphObj.solveTaretMax(freedom, print_val)
-        k = graphObj.getColorsNumber()
-        if k < colors_num:
-            colors_num = k
-            arr_coloring = deepcopy(graphObj.colors_array)
-
-    t = time() - start
-    graphObj.colors_array = deepcopy(arr_coloring)
-    del arr_coloring
-    printResults(graphObj, colors_num, t)
-
-
 def printResults(graphObj, colors, time):
     print("\nGraph statistics: ")
     graphObj.printStats()
@@ -114,16 +112,16 @@ path = os.getcwd() + "\\graphs"
 col_files = os.listdir(path)
 
 for filename in col_files:
-    # continueVal = input(
-    #     "\nThe following file is \"" + filename + "\"\nPress R to RUN , S to SKIP this file or E to EXIT"
-    #                                             "\n(by default will run)\n")
-    # if not continueVal == 'r' or continueVal == 'R':
-    #     if continueVal == 's' or continueVal == 'S':
-    #         print("-I- Skip " + filename)
-    #         continue
-    #     if continueVal == 'e' or continueVal == 'E':
-    #         print("-I- Exit")
-    #         break
+    continueVal = input(
+        "\nThe following file is \"" + filename + "\"\nPress R to RUN , S to SKIP this file or E to EXIT"
+                                                "\n(by default will run)\n")
+    if not continueVal == 'r' or continueVal == 'R':
+        if continueVal == 's' or continueVal == 'S':
+            print("-I- Skip " + filename)
+            continue
+        if continueVal == 'e' or continueVal == 'E':
+            print("-I- Exit")
+            break
     print("-I- Run \"" + filename + "\" file's graph\n")
     filename = os.getcwd() + "\\graphs\\" + filename
     # backtrack search vs forward checking
@@ -140,19 +138,14 @@ for filename in col_files:
 
     # goal target (max independent set)
     print("\n-I- Target function")
-    Target(filename)
+    Target(filename, 5, False)
 
     print("\n-I- Hybrid")
     Hybrid(filename, 100, False)
 
-    # goal target (max Ci^2)
-    print("\nattempting goal target approach local search...")
-    solve_max_Ci(filename, 5, False)
+    print("attempting goal target (max independent set) approach local search...")
+    Target2(filename)
 
-    # continueVal = input("\nDo you want to continue to next graph? press Y for yes\n(by default will exit)\n")
-    # if not continueVal == 'y' or continueVal == 'Y':
-    #     print("-I- Exit")
-    #     break
     print("**********************************************************************************")
 
 print("-I- Done")

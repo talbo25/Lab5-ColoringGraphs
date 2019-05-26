@@ -42,7 +42,7 @@ class GraphObj:
 
                 self.E.append((i - 1, j - 1))
 
-        self.colors_array = np.full((self.V), -1).astype(int)
+        self.colors_array = np.full(self.V, -1).astype(int)
 
         if len(self.E) != local_E:
             print("-E- Bad building - number of edges doesnt match to actual data")
