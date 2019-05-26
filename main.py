@@ -55,6 +55,7 @@ def Feasibility(filename, itr=10, freedom=5, print_val=False):
     graphObj.colors_array = deepcopy(arr_coloring)
     printResults(graphObj, minimum, total)
 
+
 # type 2 goal target (max Ci^2)
 def Target(filename, freedom=5, print_val=False):
     graphObj = GraphObj(filename)
@@ -73,6 +74,7 @@ def Target(filename, freedom=5, print_val=False):
     graphObj.colors_array = deepcopy(arr_coloring)
     del arr_coloring
     printResults(graphObj, colors_num, t)
+
 
 # type 3 goal target (max independent set)
 def Target2(filename):
@@ -110,11 +112,16 @@ def printResults(graphObj, colors, time):
 path = os.getcwd() + "\\graphs"
 
 col_files = os.listdir(path)
-
+run_all = False
 for filename in col_files:
-    continueVal = input(
-        "\nThe following file is \"" + filename + "\"\nPress R to RUN , S to SKIP this file or E to EXIT"
-                                                "\n(by default will run)\n")
+    if not run_all:
+        continueVal = input(
+            "\nThe following file is \"" + filename + "\"\nPress A to RUN ALL, "
+                                                      "R to RUN one-by-one , "
+                                                      "S to SKIP this file "
+                                                      "or E to EXIT"
+                                                      "\n(by default will run all)\n")
+
     if not continueVal == 'r' or continueVal == 'R':
         if continueVal == 's' or continueVal == 'S':
             print("-I- Skip " + filename)
@@ -122,6 +129,9 @@ for filename in col_files:
         if continueVal == 'e' or continueVal == 'E':
             print("-I- Exit")
             break
+        if continueVal == 'a' or continueVal == 'A':
+            run_all = True
+
     print("-I- Run \"" + filename + "\" file's graph\n")
     filename = os.getcwd() + "\\graphs\\" + filename
     # backtrack search vs forward checking

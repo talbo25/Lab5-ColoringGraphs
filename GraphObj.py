@@ -42,6 +42,9 @@ class GraphObj:
 
                 self.E.append((i - 1, j - 1))
 
+        if not self.V:
+            print("-E- Problem with init graph")
+            exit(1)
         self.colors_array = np.full(self.V, -1).astype(int)
 
         if len(self.E) != local_E:
@@ -69,7 +72,7 @@ class GraphObj:
 
         backjumps = np.zeros(shape=self.V).astype(int)
 
-        while (i >= 0) and (i < n) and (states < consts.backtrack_itrations):
+        while (i >= 0) and (i < n) and (states < consts.backtrack_iterations):
             states += 1
 
             if print_value:
@@ -92,8 +95,8 @@ class GraphObj:
         print("Time is ", time() - start)
         print("Number of states is ", states)
 
-        if states == consts.backtrack_itrations:
-            print("-W- Reached to ", consts.backtrack_itrations, " iterations")
+        if states == consts.backtrack_iterations:
+            print("-W- Reached to ", consts.backtrack_iterations, " iterations")
 
         if i < 0:
             self.colors_array = prev
@@ -354,6 +357,11 @@ class GraphObj:
             # count visitations in every v
             visits_arr = np.zeros(shape=self.V).astype(int)
 
+            if not colors:
+                print("-W- Empty list. start again")
+                consistent = False
+                break
+
             # reduce number of colors by 1
             removed_color = choice(colors)
             colors.remove(removed_color)
@@ -361,7 +369,6 @@ class GraphObj:
             # reset color of vertices with the deleted color
             for i in range(0, self.V):
                 if self.colors_array[i] == removed_color:
-                    # print("something")
                     self.colors_array[i] = self.getMinConflictsColor(colors, i)
 
             while True:
@@ -685,8 +692,8 @@ class GraphObj:
         # return neighbours
         return neighbours
 
-    def hybrid(self, K, itr=5000, print_status=True):
-        self.setRandomColors(K)
+    def hybrid(self, N, itr=5000, print_status=True):
+        self.setRandomColors(N)
 
         bad_vertices = self.getConflictedVertices()
         start = time()
@@ -694,7 +701,7 @@ class GraphObj:
         while len(bad_vertices) > 0 and attempts_counter < itr:
             if print_status and attempts_counter % 20 == 0:
                 print("-I- Number of bad vertices: ", len(bad_vertices))
-                print("-I- K value is ", len(set(self.colors_array)))
+                print("-I- N value is ", len(set(self.colors_array)))
             attempts_counter += 1
             v = choice(bad_vertices)
 
@@ -713,9 +720,9 @@ class GraphObj:
 
         return False
 
-    def setRandomColors(self, K):
+    def setRandomColors(self, N):
         for i in range(0, self.V):
-            self.colors_array[i] = randint(0, K - 1)
+            self.colors_array[i] = randint(0, N - 1)
 
     def getConflictedVertices(self):
         conflicted_array = []
