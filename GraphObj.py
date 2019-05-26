@@ -12,18 +12,18 @@ import math
 
 class GraphObj:
 
-    def __init__(self, file_name):
-        file_path = None
+    def __init__(self, file_path):
+        # file_path = None
+        #
+        # if file_name is None:
+        #     print("-E- Bad file name")
+        #     exit()
+        # else:
+        #     file_path = Path(file_name)
 
-        if file_name is None:
-            print("-E- Bad file name")
-            exit()
-        else:
-            file_path = Path(file_name)
-
-        if not file_path.is_file():
-            print("-E- Bad path")
-            exit()
+        # if not file_path.is_file():
+        #     print("-E- Bad path")
+        #     exit()
 
         fh = open(file_path, "rt")
 
@@ -89,11 +89,11 @@ class GraphObj:
                     domain_buffer[i] = deepcopy(domain[i])
                     latest[i] = -1
 
-        print("-I- Time is ", time() - start)
-        print("-I- Number of states is ", states)
+        print("Time is ", time() - start)
+        print("Number of states is ", states)
 
         if states == consts.backtrack_itrations:
-            print("backtrack terminated: itr reached upper bound")
+            print("-W- Reached to ", consts.backtrack_itrations, " iterations")
 
         if i < 0:
             self.colors_array = prev
@@ -219,8 +219,8 @@ class GraphObj:
 
         if i < 0:
             self.colors_array = deepcopy(prev)
-            print("total time: ", time() - start)
-            print("states: ", states)
+            print("Time is ", time() - start)
+            print("Number of states is ", states)
             return False
         else:
             print("total time: ", time() - start)

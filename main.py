@@ -2,6 +2,9 @@ from GraphObj import GraphObj
 from time import time
 from copy import deepcopy
 import consts
+import os
+import os.path
+
 
 def Backtrack(file_name, print_val):
     graphObj = GraphObj(filename)
@@ -52,7 +55,8 @@ def Feasibility(filename, itr=10, freedom=5, print_val=False):
     graphObj.colors_array = deepcopy(arr_coloring)
     printResults(graphObj, minimum, total)
 
-#type 3 goal target (max independent set)
+
+# type 3 goal target (max independent set)
 def Target(filename):
     graphObj = GraphObj(filename)
     graphObj.resetArray()
@@ -77,7 +81,8 @@ def Hybrid(filename, itr=100, print_val=False):
     total = time() - start
     printResults(graphObj, colors_num, total)
 
-#type 2 goal target (max Ci^2)
+
+# type 2 goal target (max Ci^2)
 def solve_max_Ci(filename, freedom=5, print_val=False):
     graphObj = GraphObj(filename)
     colors_num = graphObj.V
@@ -104,27 +109,50 @@ def printResults(graphObj, colors, time):
     print("\nTime: ", time)
 
 
-filename = "DSJC125.1.col"
+path = os.getcwd() + "\\graphs"
 
-# # backtrack search vs forward checking
-# print("-I- Start backtracking with backjumping")
-# Backtrack(filename, False)
+col_files = os.listdir(path)
 
-# print("-I- Start forward checking with arc consistency")
-# Forward_checking(filename, False)
+for filename in col_files:
+    # continueVal = input(
+    #     "\nThe following file is \"" + filename + "\"\nPress R to RUN , S to SKIP this file or E to EXIT"
+    #                                             "\n(by default will run)\n")
+    # if not continueVal == 'r' or continueVal == 'R':
+    #     if continueVal == 's' or continueVal == 'S':
+    #         print("-I- Skip " + filename)
+    #         continue
+    #     if continueVal == 'e' or continueVal == 'E':
+    #         print("-I- Exit")
+    #         break
+    print("-I- Run \"" + filename + "\" file's graph\n")
+    filename = os.getcwd() + "\\graphs\\" + filename
+    # backtrack search vs forward checking
+    print("-I- Start backtracking with backjumping")
+    Backtrack(filename, False)
 
-# # local search
-# print("-I- Local search part")
-# print("-I- Feasibility")
-# Feasibility(filename, 10, 5, False)
-#
-# # goal target (max independent set)
-# print("-I- Target function")
-# Target(filename)
-#
-print("-I- Hybrid")
-Hybrid(filename, 100, False)
-#
-# # goal target (max Ci^2)
-# print("attempting goal target approach local search...")
-# solve_max_Ci(filename, 5, False)
+    print("\n-I- Start forward checking with arc consistency")
+    Forward_checking(filename, False)
+
+    # local search
+    print("\n-I- Local search part")
+    print("-I- Feasibility")
+    Feasibility(filename, 10, 5, False)
+
+    # goal target (max independent set)
+    print("\n-I- Target function")
+    Target(filename)
+
+    print("\n-I- Hybrid")
+    Hybrid(filename, 100, False)
+
+    # goal target (max Ci^2)
+    print("\nattempting goal target approach local search...")
+    solve_max_Ci(filename, 5, False)
+
+    # continueVal = input("\nDo you want to continue to next graph? press Y for yes\n(by default will exit)\n")
+    # if not continueVal == 'y' or continueVal == 'Y':
+    #     print("-I- Exit")
+    #     break
+    print("**********************************************************************************")
+
+print("-I- Done")
