@@ -1,10 +1,8 @@
 from GraphObj import GraphObj
 from time import time
 from copy import deepcopy
-import consts
-import os
 import os.path
-
+EPOCHS = 5
 
 def Backtrack(file_name, print_val):
     graphObj = GraphObj(filename)
@@ -44,7 +42,7 @@ def Feasibility(filename, itr=10, freedom=5, print_val=False):
     minimum = graphObj.V + 1
     start = time()
     arr_coloring = []
-    for i in range(0, consts.epochs):
+    for i in range(0, EPOCHS):
         graphObj.resetArray()
         graphObj.feasiblity_LS(itr, freedom, print_val)
         if graphObj.getColorsNumber() < minimum:
@@ -56,15 +54,14 @@ def Feasibility(filename, itr=10, freedom=5, print_val=False):
     printResults(graphObj, minimum, total)
 
 
-# type 2 goal target (max Ci^2)
 def Target(filename, freedom=5, print_val=False):
     graphObj = GraphObj(filename)
     colors_num = graphObj.V
     arr_coloring = deepcopy(graphObj.colors_array)
     start = time()
 
-    for i in range(0, consts.epochs):
-        graphObj.solveTaretMax(freedom, print_val)
+    for i in range(0, EPOCHS):
+        graphObj.Target_LS(freedom, print_val)
         k = graphObj.getColorsNumber()
         if k < colors_num:
             colors_num = k
@@ -74,17 +71,6 @@ def Target(filename, freedom=5, print_val=False):
     graphObj.colors_array = deepcopy(arr_coloring)
     del arr_coloring
     printResults(graphObj, colors_num, t)
-
-
-# type 3 goal target (max independent set)
-def Target2(filename):
-    graphObj = GraphObj(filename)
-    graphObj.resetArray()
-    start = time()
-    graphObj.Target_LS()
-    colors_num = graphObj.getColorsNumber()
-    total = time() - start
-    printResults(graphObj, colors_num, total)
 
 
 def Hybrid(filename, itr=100, print_val=False):
@@ -146,15 +132,11 @@ for filename in col_files:
     print("-I- Feasibility")
     Feasibility(filename, 10, 5, False)
 
-    # goal target (max independent set)
     print("\n-I- Target function")
     Target(filename, 5, False)
 
     print("\n-I- Hybrid")
     Hybrid(filename, 100, False)
-
-    print("attempting goal target (max independent set) approach local search...")
-    Target2(filename)
 
     print("**********************************************************************************")
 
