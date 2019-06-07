@@ -605,8 +605,6 @@ class GraphObj:
             return False
 
     def calcFitness(self, _colors, _bad_edges):
-        # C: color counts
-        # B: bad edges counts
         if len(_bad_edges) != len(_colors):
             print("-W- Color counter and bad edges counter not equal")
             return -1

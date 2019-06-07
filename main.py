@@ -122,20 +122,25 @@ for filename in col_files:
     filename = os.getcwd() + "\\graphs\\" + filename
     # backtrack search vs forward checking
     print("-I- Start backtracking with backjumping")
+    print("****************************************")
     Backtrack(filename, False)
 
     print("\n-I- Start forward checking with arc consistency")
+    print("*************************************************")
     Forward_checking(filename, False)
 
     # local search
     print("\n-I- Local search part")
     print("-I- Feasibility")
+    print("****************")
     Feasibility(filename, 10, 5, False)
 
     print("\n-I- Target function")
+    print("*********************")
     Target(filename, 5, False)
 
     print("\n-I- Hybrid")
+    print("***********")
     Hybrid(filename, 100, False)
 
     print("**********************************************************************************")
